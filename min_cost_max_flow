@@ -1,0 +1,174 @@
+#include <vector>    
+#include <list>    
+#include <map>    
+#include <set>    
+#include <deque>    
+#include <stack>    
+#include <algorithm>    
+#include <sstream>    
+#include <iostream>    
+#include <iomanip>    
+#include <cstdio>    
+#include <cmath>    
+#include <cstdlib>    
+#include <ctime>    
+#include <memory.h>    
+
+#define ABS(a) ((a>0)?a:-(a))    
+#define MIN(a,b) ((a<b)?(a):(b))    
+#define MAX(a,b) ((a<b)?(b):(a))    
+#define FOR(i,a,n) for (int i=(a);i<(n);++i)    
+#define FI(i,n) for (int i=0; i<(n); ++i)    
+#define pnt pair <int, int>    
+#define mp make_pair    
+#define PI 3.14159265358979    
+#define MEMS(a,b) memset(a,b,sizeof(a))    
+#define LL long long    
+#define U unsigned  
+using namespace std; 
+
+
+
+struct edge 
+{ 
+  int to, cap, cost; 
+}; 
+vector<vector<int> > g; 
+vector<edge> E; 
+inline void addeddge(int u, int v, int cap, int cost) 
+{ 
+  edge e = { v, cap, cost }; 
+  g[u].push_back(E.size()); 
+  E.push_back(e); 
+  e.cap = 0; e.to = u; e.cost = -cost; 
+  g[v].push_back(E.size()); 
+  E.push_back(e); 
+} 
+
+vector<int> inq; 
+vector<int> que; 
+vector<int> d; 
+vector<int> from; 
+vector<int> how; 
+
+
+pnt MinCostMaxFlow(int s, int t) 
+{ 
+  int N = g.size(); 
+  int res = 0; 
+  int tcap = 0; 
+  inq.clear(); 
+  inq.resize(N); 
+  how.clear(); 
+  how.resize(N); 
+  from.clear(); 
+  from.resize(N); 
+  d.clear(); 
+  d.resize(N); 
+  while (1) 
+  { 
+    que.clear(); 
+    FOR(i, 0, inq.size()) 
+    { 
+      inq[i] = 0; 
+      d[i] = 1000000000; 
+    } 
+    inq[s] = 1; 
+    d[s] = 0; 
+    que.push_back(s); 
+    int l = 0; 
+    while (l<que.size()) 
+    { 
+      int v = que[l++]; 
+      inq[v] = 0; 
+      FOR(i, 0, g[v].size()) 
+      { 
+        int to = g[v][i]; 
+        int ver = E[to].to; 
+        if ((E[to].cap>0) && (d[v] + E[to].cost<d[ver])) 
+        { 
+          d[ver] = d[v] + E[to].cost; 
+          if (inq[ver] == 0) 
+          { 
+            inq[ver] = 1; 
+            que.push_back(ver); 
+          } 
+          from[ver] = v; 
+          how[ver] = to; 
+        } 
+      } 
+    } 
+    if (d[t] == 1000000000) 
+      break; 
+    int now = 2000000000; 
+    int v = t; 
+    while (v != s) 
+    { 
+      now = min(now, E[how[v]].cap); 
+      v = from[v]; 
+    } 
+    v = t; 
+    tcap += now; 
+    while (v != s) 
+    { 
+      res += now*E[how[v]].cost; 
+      E[how[v]].cap -= now; 
+      E[how[v] ^ 1].cap += now; 
+      v = from[v]; 
+    } 
+  } 
+  return mp(tcap,res); 
+} 
+vector<pnt > b; 
+class StoryFromTCO { 
+public: 
+    int minimumChanges(vector <int> p, vector <int> c) { 
+        int res; 
+    b.clear(); 
+    g.clear(); 
+    E.clear(); 
+    int n = p.size(); 
+    FOR(i, 0, p.size()) 
+    { 
+      b.push_back(mp(c[i], p[i])); 
+    } 
+    sort(b.begin(), b.end()); 
+    g.resize(3 * n + 2); 
+    int source = 3 * n; 
+    int dest = 3 * n + 1; 
+    FOR(i, 0, b.size()) 
+    { 
+      if (b[i].second <= b[i].first) 
+      { 
+        addeddge(i, n + n + i, 1, 0); 
+      } 
+      FOR(j, 0, b.size()) 
+      { 
+        if (b[i].second <= b[j].first) 
+        { 
+          addeddge(i, n + j, 1, 1); 
+          break; 
+        } 
+      } 
+      addeddge(source, i, 1, 0); 
+      addeddge(n + n + i, dest, 1, 0); 
+      addeddge(n + i, n + n + i, 1, 0); 
+      if (i + 1 != b.size()) 
+      { 
+        addeddge(n + i, n + i + 1, 1010, 0); 
+      } 
+    } 
+    pnt tmp = MinCostMaxFlow(source, dest); 
+    if (tmp.first != n) 
+      res = -1; 
+    else 
+      res = tmp.second; 
+        return res; 
+    } 
+
+}; 
+
+
+// Powered by FileEdit 
+// Powered by CodeProcessor
+
